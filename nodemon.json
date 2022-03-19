@@ -1,0 +1,8 @@
+{
+	"watch": ["ps.reboot"],
+	"ext": "reboot",
+	"ignore": [
+		".json"
+	],
+	"delay": "1000"
+}

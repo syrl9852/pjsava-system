@@ -1,0 +1,89 @@
+/*
+よろ～M
+多分何もできましぇん〜one_tskk
+お任せします（）one|ない|
+(*´ω｀*)
+ごめん　落ちる- one tskk
+
+ええええええええええええええええええええええええええええええええええええm
+
+|||||====
+|||||~~~~~~~~~~~~~~~~~
+|||||====
+
+//運営。見れないぞM
+
+空白文字
+
+
+______________________________________
+key
+542189642031457891423754965412562146784
+______________________________________
+
+
+私の作品
+client.on('message', message=> {
+if (message.content ==='OH')
+		message.channel.send(
+    		{embed: {
+      			color:7506394
+            	fields: [
+   					{
+    	    			name: "うわぁぁぁ",
+	        			value: "**__OH....__**",
+	      			},
+    			]
+  			}}
+		)});
+
+
+
+
+
+
+
+
+ toLowerCase
+
+ここのチャット全部消えてて草 - syota_sacv01
+全部消したけど one_tskk
+ここは会話専用のファイルだけどね() - syota_sacv01
+
+うーん...
+・欲を言えば`p,result`の送った画像にメッセージリンクとユーザーメンション欲しい(欲深い)
+これは画像送信元のURLなのかチャンネル送った先のURLなのか... - syota_sacv01
+
+/*
+
+
+
+		//付与されているロールの確認
+		if (!message.member.roles.cache.has('860116183146561566')) {
+			message.channel.send('権限が不足しています。\n権限を確認してください。')
+			return;
+		}
+		//メンションの確認
+		if (message.mentions.members.size !== 1) {
+			message.channel.send('BANするメンバーを1人指定してください')
+			return
+		}
+		//メンション相手の指定
+		var member = message.mentions.members.first()
+		//メンバーのBANが可能か確認
+		if (!member.bannable) {
+			message.channel.send('このユーザーをBANすることができません')
+			return;
+		}
+		//Ban処理
+		member.ban('BAN動作試験')
+		//BAN成功報告
+		message.channel.send(`${member.user.tag}をBANしました`)
+
+	//写真送信先のURLの取得
+	if (message.channel.id == result_ch {
+		if (message.author.id == client.user.id) {
+			var message_url = "https://discord.com/channels/849602478475706378/" + result_ch + message.id;
+			client.channels.cache.get('866969573831737344').send('写真を投稿しました。\n' + message_url)
+		}
+	}
