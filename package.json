@@ -1,34 +1,28 @@
 {
-	"name": "purosabasystem-1",
-	"version": "1.0.0",
-	"description": "このBotは、プロセカ好き用サーバー用のDiscordBotです。<br> Discord.jsを利用して書いています。<br> 誰か作るの手伝ってくだs(((<br> やることは`やること - 掲示板.txt`にあります。<br> そこからできそうなものを選んでやってください()",
-	"main": "index.js",
-	"dependencies": {
-		"@keyv/sqlite": "^2.0.2",
-		"@n-h-n/discord.js-12.5.3": "^12.5.3",
-		"@replit/database": "^2.0.1",
-		"body-parser": "^1.19.0",
-		"canvas": "^2.8.0",
-		"date-utils": "^1.2.21",
-		"discord.js": "^12.5.3",
-		"discordjs-reaction-role": "^2.1.1",
-		"dotenv": "^10.0.0",
-		"express": "^4.17.1",
-		"forever": "^4.0.1",
-		"http": "0.0.1-security",
-		"keyv": "^4.0.3",
-		"moment": "^2.29.1",
-		"moment-timezone": "^0.5.33",
-		"node-cron": "^3.0.0",
-		"request": "^2.88.2",
-		"tiny-timer": "^1.6.0"
-	},
-	"devDependencies": {},
-	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
-		"start": "npx nodemon --trace-warnings index.js"
-	},
-	"keywords": [],
-	"author": "",
-	"license": "ISC"
+  "name": "pjsava-system",
+  "version": "1.0.0",
+  "description": "プロセカ民営公園専属Bot用gitリポジトリです。",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npx nodemon --trace-warnings index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@replit/database": "^2.0.1",
+    "canvas": "^2.9.1",
+    "date-utils": "^1.2.21",
+    "discord.js": "^13.6.0",
+    "discordjs-reaction-role": "^2.1.1",
+    "dotenv": "^16.0.0",
+    "moment-timezone": "^0.5.34",
+    "node-cron": "^3.0.0",
+    "request": "^2.88.2",
+    "tiny-timer": "^1.6.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
 }

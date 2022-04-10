@@ -45,6 +45,9 @@ const Timer = require('tiny-timer')
 //定期実行用パッケージ(cron)
 const cron = require('node-cron');
 
+//envファイル用
+const dotenv = require('dotenv').config();
+
 /* 各種設定 */
 //Discordクライアントの指定
 const client = new Client({
@@ -73,7 +76,7 @@ const blacklist = config.blacklist
 const db = new Database()
 
 //トークンの指定
-const token = process.env['token']
+const token = process.env.token
 
 //プレフィックス
 const prefix = config.prefix
@@ -223,10 +226,13 @@ cron.schedule('0 0 0 * * *', () => {
 			});
 		}
 	});
+
+  
+  
 });
 
 /* メッセージ受信時に実行 */
-client.on('message', async message => {
+client.on('messageCreate', async message => {
 	//botのアイコンを取得
 	const botAvatar = avatarGet(client)
 
@@ -285,7 +291,7 @@ client.on('message', async message => {
 			db.set(keyname, value + 1).then(() => {});
 		}
 		db.get("activeuser").then(value => {
-			if (!(value.includes(message.author.id))) {
+			if (!(value.irsrsncludes(message.author.id))) {
 				db.set("activeuser", message.author.id).then(() => {})
 			}
 		})
@@ -1236,70 +1242,44 @@ client.on('message', async message => {
 				message.reply("実行しました。")
 				break;
 
-			/* DBテスト 
-			case 'dbtest':
-				const keyName = "active" + message.author.id
-				db.get(keyName).then(value => {
-					if (value === null) {
-						db.set(keyName, 1).then(() => {
-							db.get(keyName).then(value => {
-								console.log(value)
-							});
-						});
-					} else {
-						db.set(keyName, value + 1).then(() => {
-							db.get(keyName).then(value => {
-								console.log(value)
-							});
-						});
-					}
-				});
-				break;
-
-		    case 'dbtestd':
-			    const keyNameA = "active" + message.author.id
-				db.delete(keyNameA).then(() => {
-					message.channel.send("削除しました。")
-				});
-			    break;*/
-
-		    case 'fortest':
-		        const testn = ['test1',"test2","test3"]
-		    	for (const i of testn){
-		          message.channel.send(i)
-		        }
-				/*for (var i = 0; i < testn.length; i++) {
-					message.channel.send(i)			
-				}*/
-		        break;
-
-			case 'idt':
-				const msg = client.channels.cache.get('896737070637273098').messages.fetch(config.id.message.oshi.vs)
-				console.log(msg)
+			case 'rolemember':
+				const role = client.guilds.cache.get().roles.cache.get('856081627917320192').members
+				console.log(role)
 				break;
         
-      /*case 't'
-        db.get("testt").then(value => {
-          if (value == null) {
-            db.set("testt", message.author.id).then(() => {});
-          } else {
-            if (!(value.includes(message.author.id))) {
-              db.set("testt", message.author.id).then(() => {});
-            }
-          }
-        });
-        db.get("testt").then(value => {
-          message.cannel.send(value)
-        });
-        break;*/
-          case 'dblist':
-        db.list().then(keys => {
-          message.reply(keys);
-        });
-        break;
-        /* 当てはまらない時 */
+          	case 'dblist':
+        		db.list().then(keys => {
+					keys = keys.replace(', ', /r?n/g)		
+        			message.reply(`${keys}`);
+        		});
+        	break;
+        	
+			/* 当てはまらない時 */
 			default:
 				message.channel.send("引数を指定してください。")
+				break;
+		}
+	}
+
+	//各種テストコマンド類
+	if (command.startsWith('debug') && message.guild) {
+		if (!message.member.roles.cache.has(staffId)) return message.channel.send("debugコマンドはStaffロールを持っている人のみ使用できます。")
+
+		/* 引数の指定？ */
+		//const argument = args.slice("test ".length).trim().split(/ +/g);
+
+		/* コマンドの確認 */
+		const debugcmd = args.shift().toLowerCase();
+
+		/* コマンド処理 */
+		switch (debugcmd) {
+      		case 'dblist':
+        		db.list().then(keys => {
+          			message.channel.send(keys)
+     		   });
+      		default:
+        		message.chammel.send("引数を指定してください。")
+				break;
 		}
 	}
 
@@ -1421,11 +1401,13 @@ client.on('guildMemberRemove', member => {
 client.on('messageReactionAdd', async (reaction, user) => {
 	const message = reaction.message
 	const member = message.guild.members.resolve(user)
-	if (message.id== "912304959066894336") {
-		client.users.cache.get(member.user.id).send("https://discord.com/oauth2/authorize?client_id=865150642816155688&redirect_uri=https%3A%2F%2FpjsAuth.kinakomochi.repl.co&response_type=code&scope=identify%20guilds")
+	if (message.id == "961613472230146129") {
+		if (reaction.emoji.name == "📋") {
+			client.users.cache.get(member.user.id).send("https://discord.com/api/oauth2/authorize?client_id=865150642816155688&redirect_uri=https%3A%2F%2FpjsAuth.kinakomochi.repl.co%3Ftype%3Dadvertisement&response_type=code&scope=identify%20guilds")
+		}
 	}
 	//メンバーカウントの更新
-	if (reaction.message.id === "935098342894100490") {
+	if (reaction.message.id === "935098342894100490") {		
 		memberCount()
 	}
 });
@@ -1433,9 +1415,6 @@ client.on('messageReactionAdd', async (reaction, user) => {
 client.on('messageReactionRemove', async (reaction, user) => {
 	const message = reaction.message
 	const member = message.guild.members.resolve(user)
-	if (message.id== "912304959066894336") {
-		client.users.cache.get(member.user.id).send("https://discord.com/oauth2/authorize?client_id=865150642816155688&redirect_uri=https%3A%2F%2FpjsAuth.kinakomochi.repl.co&response_type=code&scope=identify%20guilds")
-	}
 	//メンバーカウントの更新
 	if (reaction.message.id === "935098342894100490") {
 		memberCount()
@@ -1497,8 +1476,13 @@ client.on("voiceStateUpdate",  (oldState, newState) => {
 			)
 			// テキストチャンネルがあった場合
 			if (textCh) {
-				// アーカイブカテゴリに移動 							
-				textCh.setParent(conid.archive, { lockPermissions: true })
+				if (textCh.lastMessage) {
+					// アーカイブカテゴリに移動 							
+					textCh.setParent(conid.archive, { lockPermissions: true })
+				} else {
+					// 聞き専使わなかった時の処理
+					textCh.delete("ハブチャンネルにて聞き専を使わなかったため")
+				}
 			}
 		}
 	}
@@ -1508,7 +1492,8 @@ client.on("voiceStateUpdate",  (oldState, newState) => {
 function chnge (member, channel) {
 	const rawData = channel.createdAt
 	const data = String(rawData.getFullYear() * (rawData.getMonth() + 1) * rawData.getDate() * rawData.getHours() * rawData.getMinutes() * rawData.getSeconds());
-	return `🗣｜${member.user.username.replace(' ', '-')}の部屋-${data}`
+	const name = member.user.username.replace(' ', '-').toLowerCase();
+	return `🗣｜${name}の部屋-${data}`
 }
 
 //待機関数
@@ -1544,23 +1529,17 @@ function avatarGet(member) {
 /* メンバー取得関数 */
 function memberGet(message, args) {
 	//メンションが2以上もしくは0ではないかの確認
-	if (message.mentions.members.size !== 1) {
-		//メンションが0なのかの確認
-		if (message.mentions.members.size == 0) {
-			//ユーザーIDが指定されているか確認
-			const userID = args.join(" ");
-			const member = message.guild.members.resolve(userID)
-			if (member) {
+	if (message.mentions.members.size == 0) {
+		//ユーザーIDが指定されているか確認
+		const userID = args.join(" ");
+		const member = message.guild.members.resolve(userID)
+		if (member) {
 				return [member, 19];
 			} else {
 				//メッセージ送信者を指定
 				const member = message.member
 				return [member, false];
 			}
-		} else {
-			//メンションが2以上の場合
-			return false;
-		}
 	} else {
 		//メンションされた人を指定
 		const member = message.mentions.members.first();
@@ -1663,7 +1642,6 @@ function formatTime (time) {
 		"comparison": comparison
 	}
 }
-
 /* 固定メッセージRR設定用 */
 const rr = new ReactionRole( client, [
 	/* Virtual Singer */
