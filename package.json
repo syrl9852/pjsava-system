@@ -1,28 +1,1 @@
-{
-  "name": "pjsava-system",
-  "version": "1.0.0",
-  "description": "プロセカ民営公園専属Bot用gitリポジトリです。",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npx nodemon --trace-warnings index.js"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@replit/database": "^2.0.1",
-    "canvas": "^2.9.1",
-    "date-utils": "^1.2.21",
-    "discord.js": "^13.6.0",
-    "discordjs-reaction-role": "^2.1.1",
-    "dotenv": "^16.0.0",
-    "moment-timezone": "^0.5.34",
-    "node-cron": "^3.0.0",
-    "request": "^2.88.2",
-    "tiny-timer": "^1.6.0"
-  },
-  "devDependencies": {
-    "nodemon": "^2.0.15"
-  }
-}
+{  "name": "pjsava-system",  "version": "1.0.0",  "description": "プロセカ民営公園用Bot「プロ鯖SYSTEM」です。",  "main": "index.js",  "scripts": {    "start": "npx node index.js"  },  "author": "",  "license": "ISC",  "dependencies": {    "discord.js": "^14.7.1",    "discordjs-reaction-role": "^3.1.0",    "dotenv": "^16.0.3",    "fs": "0.0.1-security",    "moment": "^2.29.4",    "moment-timezone": "^0.5.40",    "node-cron": "^3.0.2"  },  "private": true,  "devDependencies": {    "node": "^16.19.0"  }}
