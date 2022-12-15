@@ -1,11 +1,4 @@
 {
-	"prefix": "ps!",
-	"blackList": {
-		"cmdBanUser": [
-    		"849626134453813280",
-			"853117758644027423"
-		]
-	},
 	"id": {
 		"server": "849602478475706378",
 		"channels": {
@@ -183,12 +176,5 @@
 			"ena": "896755531811799071",
 			"mizuki": "896755559066386483"
 		}
-	},
-	"stump": [
-		"めも、多分使わない",
-		"https://sekai-res.dnaroma.eu/file/sekai-assets/stamp/stamp0179_rip/stamp0179/stamp0179.png",
-		"https://sekai-res.dnaroma.eu/file/sekai-assets/stamp/stamp0221_rip/stamp0221/stamp0221.png",
-		"https://sekai-res.dnaroma.eu/file/sekai-assets/stamp/stamp0168_rip/stamp0168/stamp0168.png",
-		"https://sekai-res.dnaroma.eu/file/sekai-assets/stamp/stamp0488_rip/stamp0488/stamp0488.png"
-	]
+	}
 }
