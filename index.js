@@ -4,7 +4,14 @@ const {
 	REST,
 	Routes
 } = require('discord.js');
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({
+	intents: [
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildMembers,
+		GatewayIntentBits.GuildVoiceStates,
+		GatewayIntentBits.GuildMessageReactions
+	]
+});
 
 const moment = require('moment-timezone');
 const cron = require('node-cron');
@@ -93,7 +100,7 @@ const commands = [
 /* Bot起動時に実行 */
 client.on("ready", message => {
 	//スラッシュコマンドの更新
-	(async () => {
+	/*(async () => {
 		try {
 			console.log('Started refreshing application (/) commands.');
 
@@ -103,7 +110,7 @@ client.on("ready", message => {
 		} catch (error) {
 			console.error(error);
 		}
-	})()
+	})()*/
 	//開始時間，Bot名をConsoleに表示
 	console.log(`${nt()}に${client.user.tag}でログインしました!`);
 	//ステータスメッセージを設定
@@ -250,30 +257,41 @@ client.on('messageReactionRemove', async (reaction, user) => {
 /* VCメンバー入退出時に実行 */
 client.on("voiceStateUpdate",  (oldState, newState) => {
 	// VoiceChannel関連の設定を読み込み
-	const conid = config.id.channel.voice
+	const conid = config.id.channels.voice
 	// メンバー参加時
-	if(oldState.channelID == null && newState.channelID != null) {
+	if(newState.channelId != null) {
 		// ハブチャンネルに参加したか
-		if (conid.hub.includes(newState.channelID)) {
+		if (conid.hub == newState.channelId) {
 			// 参加したメンバーを取得
-			const member = newState.guild.members.cache.get(newState.id)
+			const member = client.users.cache.get(newState.id)
+			// サーバーを取得
+			const guild = newState.guild
 			// 参加したサーバーのチャンネルを取得
-			const che = newState.guild.channels.cache
-			// 参加したチャンネルを取得
-			const channel = che.get(newState.channelID)
+			const channel = guild.channels.cache.get(newState.channelId)
 			// ボイスチャンネルの作成
-			newState.guild.channels.create(`${member.user.username}の部屋` , {
-				type: "voice",
-				parent: channel.parentID
-			}).then(channel => {
+			guild.channels.create({
+				name: `${member.username}の部屋`,
+				type: 2,
+				parent: channel.parentId
+			})
+			.then(channel => {
 				// メンバーをVCに移動
-				member.voice.setChannel(channel)
-				if (newState.channelID != "964148658738192455") {
+				const gm = guild.members.resolve(member)
+				gm.voice.setChannel(channel)
+				if (
+					 // ハブチャンネルではないか
+					conid.hub != channel.id &&
+					 // AFKチャンネルではないか
+					channel.id != channel.guild.afkChannelId &&
+					 // 例外チャンネルに含まれていないか
+					!conid.ignore.includes(channel.id)
+				) {
 					// 聞き専チャンネルを作成
-					newState.guild.channels.create(chnge(member, channel), {
-						"type": 'text',
-						"parent": channel.parentID,
-						"topic": `${member.user.username}の部屋用の聞き専です。`
+					newState.guild.channels.create({
+						"name": chnge(member, channel),
+						"type": 0,
+						"parent": channel.parentId,
+						"topic": `「${member.username}の部屋」用の聞き専です。`
 					})
 				}
 			})
@@ -281,36 +299,36 @@ client.on("voiceStateUpdate",  (oldState, newState) => {
 	}
 	
 	// メンバー退出時
-	if(oldState.channelID != null && newState.channelID == null) {
+	if(oldState.channelId != null) {
 		// 退出したメンバーを取得
-		const member = oldState.guild.members.cache.get(oldState.id)
-		// 退出したサーバーのチャンネルを取得
-		const che = oldState.guild.channels.cache
-		// 退出したチャンネルを取得
-		const channel = che.get(oldState.channelID)
+		const member = client.users.cache.get(oldState.id)
+		// サーバーを取得
+		const guild = oldState.guild
+		// 参加したサーバーのチャンネルを取得
+		const channel = guild.channels.cache.get(oldState.channelId)
 		// フィルター
 		if (
 			 // ハブカテゴリか
-			conid.parent.includes(channel.parentID) &&
+			conid.parent == channel.parentId &&
 			 // 誰も居ないか
 			channel.members.size == "0" &&
 			 // ハブチャンネルではないか
-			!conid.hub.includes(channel.id) &&
+			conid.hub != channel.id &&
 			 // AFKチャンネルではないか
-			channel.id != channel.guild.afkChannelID &&
+			channel.id != channel.guild.afkChannelId &&
 			 // 例外チャンネルに含まれていないか
 			!conid.ignore.includes(channel.id)
 		) {
 			// チャンネルの削除
 			channel.delete()
 			// 付随するテキストチャンネルを検索
-			const textCh = che.find( (textch)=> 
+			const textCh = guild.channels.cache.find( (textch)=> 
 				textch.name === chnge(member, channel)
 			)
 			// テキストチャンネルがあった場合
 			if (textCh) {
 				if (textCh.lastMessage) {
-					// アーカイブカテゴリに移動 							
+					// アーカイブカテゴリに移動 
 					textCh.setParent(conid.archive, { lockPermissions: true })
 				} else {
 					// 聞き専使わなかった時の処理
@@ -325,7 +343,7 @@ client.on("voiceStateUpdate",  (oldState, newState) => {
 function chnge (member, channel) {
 	const rawData = channel.createdAt
 	const data = String(rawData.getFullYear() * (rawData.getMonth() + 1) * rawData.getDate() * rawData.getHours() * rawData.getMinutes() * rawData.getSeconds());
-	let name = member.user.username.replace(' ', '-')
+	let name = member.username.replace(' ', '-')
 	name = name.toLowerCase();
 	return `🗣｜${name}の部屋-${data}`
 }
