@@ -22,6 +22,23 @@ const { ReactionRole } = require("discordjs-reaction-role");
 const config = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
 require('dotenv').config();
 
+const mysql = require('mysql')
+const connection = mysql.createConnection({
+	host: 'localhost',
+	user: 'pjsava',
+	password: process.env.mysql_pw,
+	database: 'pjsava_db'
+});
+
+// MySQLデータベースに接続
+connection.connect((err) => {
+	if (err) {
+		console.log('error connecting: ' + err.stack);
+		return;
+	}
+	console.log('Successfully connected to SQL database.');
+});
+
 //トークンの指定
 const token = process.env.token
 
@@ -66,23 +83,6 @@ const mutedID = roleID.status.muted
 // セカイに住む一般豆腐
 const toufuID = roleID.status.touhu
 
-//ファンロール
-let manaFan = roleID.fan.manager
-let soraFan = []
-let sayaFan = []
-let oneFan = []
-let zeroFan = []
-let minaFan = []
-let rusiFan = []
-for (var i = 0; i < 10; i++) {
-	soraFan[i] = manaFan.sora[i]
-	sayaFan[i] = manaFan.saya[i]
-	oneFan[i] = manaFan.one[i]
-	zeroFan[i] = manaFan.zero[i]
-	minaFan[i] = manaFan.mina[i]
-	rusiFan[i] = manaFan.rusi[i]
-};
-
 /* 定期的にメンバーカウントを再確認する */
 cron.schedule('0 0,30 * * * *', () => {
 	memberCount()
@@ -92,15 +92,41 @@ cron.schedule('0 0,30 * * * *', () => {
 //スラッシュコマンド
 const commands = [
 	{
-		name: 'ping',
-		description: 'Replies with Pong!',
+		"name": 'ping',
+		"description": 'Replies with Pong!'
 	},
+	{
+		"name": "check-in",
+		"description": "運営ファンランクの更新ができます！(1ヶ月に1回)"
+	},
+	{
+		"name": "reset",
+		"description": "自身の運営ファンのランクをリセットします。"
+	},
+	{
+		"name": "register",
+		"description": "運営ファンの設定ができます。",
+		"options": [{
+			"type": 3,
+			"name": "target",
+			"description": "誰のファンになりますか？",
+			"required": true,
+			"choices": [
+				{ "name": "暁月蒼空", "value": "sora" },
+				{ "name": "春宮咲耶", "value": "saya" },
+				{ "name": "one tskk", "value": "one" },
+				{ "name": "大鳳零月", "value": "zero" },
+				{ "name": "みなづき", "value": "mina" },
+				{ "name": "るしふぁー", "value": "rusi"}
+			]
+		}]
+	}
 ];
 
 /* Bot起動時に実行 */
 client.on("ready", message => {
 	//スラッシュコマンドの更新
-	/*(async () => {
+	(async () => {
 		try {
 			console.log('Started refreshing application (/) commands.');
 
@@ -110,7 +136,7 @@ client.on("ready", message => {
 		} catch (error) {
 			console.error(error);
 		}
-	})()*/
+	})()
 	//開始時間，Bot名をConsoleに表示
 	console.log(`${nt()}に${client.user.tag}でログインしました!`);
 	//ステータスメッセージを設定
@@ -126,7 +152,84 @@ client.on('interactionCreate', async interaction => {
 	if (interaction.commandName === 'ping') {
 		await interaction.reply('Pong!');
 	}
+
+	// 運営ファン
+	// 登録
+	if (interaction.commandName === 'register') return sqlconnect(interaction, connection, 1);
+	// 削除
+	if (interaction.commandName === 'reset') return sqlconnect(interaction, connection, 2)
+	// 更新
+	if (interaction.commandName === 'check-in') return sqlconnect(interaction, connection, 3);
 });
+
+// 運営ファン関連
+function sqlconnect (interaction, connection, mode) {
+	const userId = interaction.user.id
+	const miDate = new Date().getTime();
+	connection.query(`select * from oshirole where user = ${userId}`, function (error, results, fields) {
+		if (error) throw error;
+		const result = results[0];
+		switch (mode) {
+			// 登録
+			case 1: 
+				const target = interaction.options.getString('target');
+
+				if (result) {
+					const restar = eval(`result.${target}`)
+					if (!restar) {
+						// 初期設定済み
+						connection.query(`update oshirole set ${target}=1, lastdate=${miDate} where user = ${userId}`)
+						interaction.reply({ content: '登録が完了しました！\n更新は/check-inから出来ます。', ephemeral: true });
+					} else {
+						// 既に登録済み
+						interaction.reply({ content: '既に登録されています。\n更新は/check-inから出来ます。', ephemeral: true });
+					}
+				} else {
+					// 未登録
+					connection.query(`insert into oshirole (user, lastdate, ${target}) values (${userId}, ${miDate}, 1)`)
+					interaction.reply({ content: '登録が完了しました！\n更新は/check-inから出来ます。', ephemeral: true });
+				}
+				break;
+
+			// 削除
+			case 2:
+				if (result) {
+					connection.query(`delete from oshirole where user = ${userId}`)
+					interaction.reply({ content: 'リセットしました。', ephemeral: true})
+				} else {
+					interaction.reply({ content: '未登録です。\n登録は、/registerからできます。', ephemeral: true})
+				}
+				break;
+
+			// 更新
+			case 3:
+				if (result) {
+					console.log()
+					if (miDate > result.lastdate + 2592000000) {
+						// 登録済み
+						connection.query(
+							`update oshirole set
+								lastdate = ${new Date().getTime()},
+								sora = sora + 1,
+								saya = saya + 1,
+								one = one + 1,
+								zero = zero + 1,
+								mina = mina + 1,
+								rusi = rusi + 1
+							where user = ${userId}`
+						)
+						interaction.reply({ content: '更新に成功しました！', ephemeral: true});
+					} else {
+						const nextCan = moment(new Date(result.lastdate + 2592000000)).tz('Asia/Tokyo').format('YYYY/MM/DD HH:mm:ss');
+						interaction.reply({ content: `更新に失敗しました。\n更新は1ヶ月に1回行えます。\n次回更新日は${nextCan}`, ephemeral: true})
+					}
+				} else {
+					interaction.reply({ content:'未登録です。\n登録は、/registerからできます。', ephemeral: true})
+				}
+				break;
+		}
+	});
+};
 
 /* メンバー参加時に実行 */
 client.on('guildMemberAdd', async member => {
@@ -274,27 +377,6 @@ client.on("voiceStateUpdate",  (oldState, newState) => {
 				type: 2,
 				parent: channel.parentId
 			})
-			.then(channel => {
-				// メンバーをVCに移動
-				const gm = guild.members.resolve(member)
-				gm.voice.setChannel(channel)
-				if (
-					 // ハブチャンネルではないか
-					conid.hub != channel.id &&
-					 // AFKチャンネルではないか
-					channel.id != channel.guild.afkChannelId &&
-					 // 例外チャンネルに含まれていないか
-					!conid.ignore.includes(channel.id)
-				) {
-					// 聞き専チャンネルを作成
-					newState.guild.channels.create({
-						"name": chnge(member, channel),
-						"type": 0,
-						"parent": channel.parentId,
-						"topic": `「${member.username}の部屋」用の聞き専です。`
-					})
-				}
-			})
 		}
 	}
 	
@@ -321,38 +403,9 @@ client.on("voiceStateUpdate",  (oldState, newState) => {
 		) {
 			// チャンネルの削除
 			channel.delete()
-			// 付随するテキストチャンネルを検索
-			const textCh = guild.channels.cache.find( (textch)=> 
-				textch.name === chnge(member, channel)
-			)
-			// テキストチャンネルがあった場合
-			if (textCh) {
-				if (textCh.lastMessage) {
-					// アーカイブカテゴリに移動 
-					textCh.setParent(conid.archive, { lockPermissions: true })
-				} else {
-					// 聞き専使わなかった時の処理
-					textCh.delete("ハブチャンネルにて聞き専を使わなかったため")
-				}
-			}
 		}
 	}
 });
-
-// チャンネル名生成
-function chnge (member, channel) {
-	const rawData = channel.createdAt
-	const data = String(rawData.getFullYear() * (rawData.getMonth() + 1) * rawData.getDate() * rawData.getHours() * rawData.getMinutes() * rawData.getSeconds());
-	let name = member.username.replace(' ', '-')
-	name = name.toLowerCase();
-	return `🗣｜${name}の部屋-${data}`
-}
-
-//待機関数
-function sleep(waitMsec) {
-	var startMsec = new Date();
-	while (new Date() - startMsec < waitMsec);
-}
 
 //現在時刻取得
 function nt() {
@@ -363,26 +416,18 @@ function nt() {
 /* メンバーカウント更新関数 */
 function memberCount() {
 	const guild = client.guilds.cache.get(serverID);
-	const all = guild.memberCount;
-	const user = all - guild.members.cache.filter(member => member.user.bot).size;
-	const bot = guild.members.cache.filter(member => member.user.bot).size;
-	const touhu = guild.members.cache.filter(member => member.roles.cache.has('849605656691474472')).size;
-	guild.channels.cache.get(memberCountChannel).setName('ユーザー数: ' + all);
-	guild.channels.cache.get(userCountChannel).setName('メンバー数: ' + user);
-	guild.channels.cache.get(touhuCountChannel).setName('豆腐の人数: ' + touhu);
-	guild.channels.cache.get(botCountChannel).setName('Bot数: ' + bot);
-	return user;
-}
-
-/* アイコン取得関数 */
-function avatarGet(member) {
-	//アイコンを取得
-	const avatar = member.user.displayAvatarURL({
-		format: "png",
-		dynamic: true,
-		size: 1024
-	})
-	return avatar;
+	guild.members.fetch().then(() => {
+		const all = guild.memberCount;
+		const user = all - guild.members.cache.filter(member => member.user.bot).size;
+		const bot = guild.members.cache.filter(member => member.user.bot).size;
+		let touhu = guild.roles.cache.get('849605656691474472')
+		touhu = touhu.members.size
+		guild.channels.cache.get(memberCountChannel).setName('ユーザー数: ' + all);
+		guild.channels.cache.get(userCountChannel).setName('メンバー数: ' + user);
+		guild.channels.cache.get(touhuCountChannel).setName('豆腐の人数: ' + touhu);
+		guild.channels.cache.get(botCountChannel).setName('Bot数: ' + bot);
+		return user;
+	});
 }
 
 /* 固定メッセージRR設定用 */
