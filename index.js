@@ -2,7 +2,8 @@ const {
 	Client, 
 	GatewayIntentBits,
 	REST,
-	Routes
+	Routes,
+	AttachmentBuilder
 } = require('discord.js');
 const client = new Client({
 	intents: [
@@ -279,12 +280,11 @@ client.on('guildMemberAdd', async member => {
 	//切り取り
 	context.clip();
 	//アイコンを読み込み
-	console.log(member.displayAvatarURL);
-	const avatar = await canvas.loadImage(member.displayAvatarURL("png"));
+	const avatar = await loadImage(member.displayAvatarURL("png"));
 	//アイコンの描画
 	context.drawImage(avatar, 25, 25, 200, 200);
 	//Attachmentクラスに画像を保存
-	const attachment = new MessageAttachment(canvas.toBuffer(), 'welcome-image.png');
+	const attachment = new AttachmentBuilder(canvas.toBuffer(), 'welcome-image.png');
 	member.guild.channels.cache.get('853904783000469535').send({
 		content: `ようこそ！<@${member.user.id}>さん！\n` +
 			"このサーバーはプロセカが大好きな人達が集まるDiscordコミュニティです！\n" +
