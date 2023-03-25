@@ -279,6 +279,7 @@ client.on('guildMemberAdd', async member => {
 	//切り取り
 	context.clip();
 	//アイコンを読み込み
+	console.log(member.displayAvatarURL);
 	const avatar = await canvas.loadImage(member.displayAvatarURL);
 	//アイコンの描画
 	context.drawImage(avatar, 25, 25, 200, 200);
