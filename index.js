@@ -252,7 +252,7 @@ client.on('guildMemberAdd', async member => {
 	const context = canvas.getContext('2d');
 	//背景画像の読み込み
 	const file_url = "./join.png"
-	const background = await Canvas.loadImage(file_url);
+	const background = await canvas.loadImage(file_url);
 	//画像をキャンバスの大きさに引き伸ばし
 	context.drawImage(background, 0, 0, canvas.width, canvas.height);
 	//境界線の色を指定
@@ -279,7 +279,7 @@ client.on('guildMemberAdd', async member => {
 	//切り取り
 	context.clip();
 	//アイコンを読み込み
-	const avatar = await Canvas.loadImage(avatarGet(member));
+	const avatar = await canvas.loadImage(avatarGet(member));
 	//アイコンの描画
 	context.drawImage(avatar, 25, 25, 200, 200);
 	//Attachmentクラスに画像を保存
