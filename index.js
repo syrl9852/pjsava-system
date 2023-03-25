@@ -247,7 +247,8 @@ client.on('guildMemberAdd', async member => {
 	//メンバー数の取得
 	const member_count = memberCount()
 	//キャンバスづくり
-	const canvas = Canvas.createCanvas(700, 250);
+	const { createCanvas, loadImage } = require('canvas');
+	const canvas = createCanvas(700, 250);
 	const context = canvas.getContext('2d');
 	//背景画像の読み込み
 	const file_url = "./join.png"
