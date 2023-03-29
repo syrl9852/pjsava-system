@@ -280,7 +280,7 @@ client.on('guildMemberAdd', async member => {
 	//切り取り
 	context.clip();
 	//アイコンを読み込み
-	const avatar = await loadImage(member.displayAvatarURL("png"));
+	const avatar = await loadImage(`https://cdn.discordapp.com/avatars/${interaction.user.id}/${interaction.user.avatar}.png`);
 	//アイコンの描画
 	context.drawImage(avatar, 25, 25, 200, 200);
 	//Attachmentクラスに画像を保存
