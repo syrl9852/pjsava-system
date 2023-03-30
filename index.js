@@ -58,6 +58,32 @@ const touhuCountChannel = config.id.channels.count.touhu
 //Bot数記録ch
 const botCountChannel = config.id.channels.count.bot
 
+/* ロール指定 */
+const roleID = config.id.roles
+
+// Owner
+const ownerId = roleID.status.owner
+// Bot
+const botID = roleID.status.bot
+// Admin
+const adminId = roleID.status.admin
+// Moderator
+const supporter = roleID.status.supporter
+// Manager
+const managerId = roleID.status.manager
+
+// Developer
+const developerID = roleID.status.developer
+// Staff
+const staffId = roleID.status.staff
+// サーバー支援者
+const boostID = roleID.status.boost
+
+// ミュート
+const mutedID = roleID.status.muted
+// セカイに住む一般豆腐
+const toufuID = roleID.status.touhu
+
 /* 定期的にメンバーカウントを再確認する */
 cron.schedule('0 0,30 * * * *', () => {
 	memberCount()
@@ -95,10 +121,6 @@ const commands = [
 				{ "name": "るしふぁー", "value": "rusi"}
 			]
 		}]
-	},
-	{
-		"name": "test",
-		"description": "Staff Only"
 	}
 ];
 
@@ -139,12 +161,6 @@ client.on('interactionCreate', async interaction => {
 	if (interaction.commandName === 'reset') return sqlconnect(interaction, connection, 2)
 	// 更新
 	if (interaction.commandName === 'check-in') return sqlconnect(interaction, connection, 3);
-
-	// テスト用
-	if (interaction.commandName === 'test') {
-		const member = interaction.member
-		client.emit('guildMemberAdd', member);
-	}
 });
 
 // 運営ファン関連
@@ -218,9 +234,8 @@ function sqlconnect (interaction, connection, mode) {
 
 /* メンバー参加時に実行 */
 client.on('guildMemberAdd', async member => {
-	const user = member.user
 	//Botの場合は無視
-	if (user.bot) return;
+	if (member.user.bot) return;
 	/* ようこそ画像用 */
 	const applyText = (canvas, text) => {
 		const context = canvas.getContext('2d');
@@ -231,7 +246,7 @@ client.on('guildMemberAdd', async member => {
 		return context.font;
 	};
 	//メンバー数の取得
-	const member_count = await memberCount()
+	const member_count = memberCount()
 	//キャンバスづくり
 	const { createCanvas, loadImage } = require('canvas');
 	const canvas = createCanvas(700, 250);
@@ -265,22 +280,16 @@ client.on('guildMemberAdd', async member => {
 	//切り取り
 	context.clip();
 	//アイコンを読み込み
-	const avatar = await loadImage(`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`);
+	const avatar = await loadImage(`https://cdn.discordapp.com/avatars/${member.user.id}/${member.user.avatar}.png`);
 	//アイコンの描画
 	context.drawImage(avatar, 25, 25, 200, 200);
 	//Attachmentクラスに画像を保存
 	const attachment = new AttachmentBuilder(canvas.toBuffer(), 'welcome-image.png');
-	let postChannelId
-	if (member.roles.cache.has('913057560129593425')) {
-		postChannelId = '868714270974701588'
-	} else {
-		postChannelId = '853904783000469535'
-	}
-	member.guild.channels.cache.get(postChannelId).send({
-		content: `ようこそ！<@${user.id}>さん！\n` +
+	member.guild.channels.cache.get('853904783000469535').send({
+		content: `ようこそ！<@${member.user.id}>さん！\n` +
 			"このサーバーはプロセカが大好きな人達が集まるDiscordコミュニティです！\n" +
 			"ぜひ楽しんでってね！\n" +
-			`現在のメンバー数：${member_count}\n\n` +
+			/*`現在のメンバー数：${member_count}\n\n` +*/
 			"------------------------------\n\n" +
 			"まずは<#932874132587180092>で参加認証を済ませましょう。\n" +
 			"そうしたら<#849977288828387378>で自己紹介をしてサーバーのみんなに自分を紹介しよう！\n" +
@@ -291,8 +300,8 @@ client.on('guildMemberAdd', async member => {
 		files: [attachment]
 	})
 	//DMにメッセージ送信
-	client.users.cache.get(user.id).send({
-		content: `ようこそ！<@${user.id}>さん！\n` +
+	client.users.cache.get(member.user.id).send({
+		content: `ようこそ！<@${member.user.id}>さん！\n` +
 		"このサーバーはプロセカが大好きな人達が集まるDiscordコミュニティです！\n" +
 		"ぜひ楽しんでってね！",
 		files: [attachment]
@@ -407,19 +416,20 @@ function nt() {
 };
 
 /* メンバーカウント更新関数 */
-async function memberCount() {
+function memberCount() {
 	const guild = client.guilds.cache.get(serverID);
-	await Promise.all([guild.members.fetch(), guild.roles.fetch()]); // ここで非同期処理をまとめて実行
-	const all = guild.memberCount;
-	const user = all - guild.members.cache.filter(member => member.user.bot).size;
-	const bot = guild.members.cache.filter(member => member.user.bot).size;
-	let touhu = guild.roles.cache.get('849605656691474472');
-	touhu = touhu.members.size;
-	guild.channels.cache.get(memberCountChannel).setName('ユーザー数: ' + all);
-	guild.channels.cache.get(userCountChannel).setName('メンバー数: ' + user);
-	guild.channels.cache.get(touhuCountChannel).setName('豆腐の人数: ' + touhu);
-	guild.channels.cache.get(botCountChannel).setName('Bot数: ' + bot);
-	return user;
+	guild.members.fetch().then(() => {
+		const all = guild.memberCount;
+		const user = all - guild.members.cache.filter(member => member.user.bot).size;
+		const bot = guild.members.cache.filter(member => member.user.bot).size;
+		let touhu = guild.roles.cache.get('849605656691474472')
+		touhu = touhu.members.size
+		guild.channels.cache.get(memberCountChannel).setName('ユーザー数: ' + all);
+		guild.channels.cache.get(userCountChannel).setName('メンバー数: ' + user);
+		guild.channels.cache.get(touhuCountChannel).setName('豆腐の人数: ' + touhu);
+		guild.channels.cache.get(botCountChannel).setName('Bot数: ' + bot);
+		return user;
+	});
 }
 
 /* 固定メッセージRR設定用 */
