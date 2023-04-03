@@ -1,5 +1,5 @@
 const {
-	Client, 
+	Client,
 	GatewayIntentBits,
 	REST,
 	Routes,
@@ -95,10 +95,6 @@ const commands = [
 				{ "name": "るしふぁー", "value": "rusi"}
 			]
 		}]
-	},
-	{
-		"name": "test",
-		"description": "Staff Only"
 	}
 ];
 
@@ -110,7 +106,7 @@ client.on("ready", message => {
 			console.log('Started refreshing application (/) commands.');
 
 			await rest.put(Routes.applicationCommands(client.user.id), { body: commands });
-			
+
 			console.log('Successfully reloaded application (/) commands.');
 		} catch (error) {
 			console.error(error);
@@ -141,10 +137,10 @@ client.on('interactionCreate', async interaction => {
 	if (interaction.commandName === 'check-in') return sqlconnect(interaction, connection, 3);
 
 	// テスト用
-	if (interaction.commandName === 'test') {
+	/*if (interaction.commandName === 'test') {
 		const member = interaction.member
 		client.emit('guildMemberAdd', member);
-	}
+	}*/
 });
 
 // 運営ファン関連
@@ -154,12 +150,11 @@ function sqlconnect (interaction, connection, mode) {
 	connection.query(`select * from oshirole where user = ${userId}`, function (error, results, fields) {
 		if (error) throw error;
 		const result = results[0];
-		switch (mode) {
-			// 登録
-			case 1: 
-				const target = interaction.options.getString('target');
-
-				if (result) {
+		if (result) {
+			switch (mode) {
+				//登録
+				case 1:
+					const target = interaction.options.getString('target');
 					const restar = eval(`result.${target}`)
 					if (!restar) {
 						// 初期設定済み
@@ -169,27 +164,12 @@ function sqlconnect (interaction, connection, mode) {
 						// 既に登録済み
 						interaction.reply({ content: '既に登録されています。\n更新は/check-inから出来ます。', ephemeral: true });
 					}
-				} else {
-					// 未登録
-					connection.query(`insert into oshirole (user, lastdate, ${target}) values (${userId}, ${miDate}, 1)`)
-					interaction.reply({ content: '登録が完了しました！\n更新は/check-inから出来ます。', ephemeral: true });
-				}
-				break;
-
-			// 削除
-			case 2:
-				if (result) {
+				// リセット
+				case 2:
 					connection.query(`delete from oshirole where user = ${userId}`)
 					interaction.reply({ content: 'リセットしました。', ephemeral: true})
-				} else {
-					interaction.reply({ content: '未登録です。\n登録は、/registerからできます。', ephemeral: true})
-				}
-				break;
-
-			// 更新
-			case 3:
-				if (result) {
-					console.log()
+				//更新
+				case 3:
 					if (miDate > result.lastdate + 2592000000) {
 						// 登録済み
 						connection.query(
@@ -208,10 +188,14 @@ function sqlconnect (interaction, connection, mode) {
 						const nextCan = moment(new Date(result.lastdate + 2592000000)).tz('Asia/Tokyo').format('YYYY/MM/DD HH:mm:ss');
 						interaction.reply({ content: `更新に失敗しました。\n更新は1ヶ月に1回行えます。\n次回更新日は${nextCan}`, ephemeral: true})
 					}
-				} else {
-					interaction.reply({ content:'未登録です。\n登録は、/registerからできます。', ephemeral: true})
-				}
-				break;
+			}
+		} else {
+			if (mode == 1) {
+				connection.query(`insert into oshirole (user, lastdate, ${target}) values (${userId}, ${miDate}, 1)`)
+				interaction.reply({ content: '登録が完了しました！\n更新は/check-inから出来ます。', ephemeral: true });
+			} else {
+				interaction.reply({ content: '未登録です。\n登録は、/registerからできます。', ephemeral: true})
+			}
 		}
 	});
 };
@@ -285,7 +269,7 @@ client.on('guildMemberAdd', async member => {
 			"まずは<#932874132587180092>で参加認証を済ませましょう。\n" +
 			"そうしたら<#849977288828387378>で自己紹介をしてサーバーのみんなに自分を紹介しよう！\n" +
 			"テンプレートはチャンネル内のピン留めを使ってください。\n" +
-			"<#855999316706721792>から各種ロールの取得、<#896737070637273098>で推しロールも取得できます。\n"+ 
+			"<#855999316706721792>から各種ロールの取得、<#896737070637273098>で推しロールも取得できます。\n"+
 			"なにかありましたら<#849636324104339516>からご連絡ください。\n" +
 			"長くなったけどこれからよろしくね！",
 		files: [attachment]
@@ -372,7 +356,7 @@ client.on("voiceStateUpdate",  (oldState, newState) => {
 			})
 		}
 	}
-	
+
 	// メンバー退出時
 	if(oldState.channelId != null) {
 		// 退出したメンバーを取得
@@ -546,7 +530,7 @@ const rr = new ReactionRole( client, [
 		reaction: oshiEmoji.sizuku,
 		roleId: oshiRole.sizuku
 	},
-	
+
 	/* Vivid Bad SQUAD */
 	// Vivid Bad SQUAD
 	{
@@ -584,7 +568,7 @@ const rr = new ReactionRole( client, [
 		reaction: oshiEmoji.touya,
 		roleId: oshiRole.touya
 	},
-	
+
 	/* ワンダーランズ×ショウタイム */
 	// ワンダーランズ×ショウタイム
 	{
@@ -622,7 +606,7 @@ const rr = new ReactionRole( client, [
 		reaction: oshiEmoji.rui,
 		roleId: oshiRole.rui
 	},
-	
+
 	/* 25時、ナイトコードで。 */
 	// 25時、ナイトコードで。
 	{
