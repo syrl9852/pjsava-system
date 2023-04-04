@@ -274,13 +274,6 @@ client.on('guildMemberAdd', async member => {
 			"長くなったけどこれからよろしくね！",
 		files: [attachment]
 	})
-	//DMにメッセージ送信
-	client.users.cache.get(user.id).send({
-		content: `ようこそ！<@${user.id}>さん！\n` +
-		"このサーバーはプロセカが大好きな人達が集まるDiscordコミュニティです！\n" +
-		"ぜひ楽しんでってね！",
-		files: [attachment]
-	})
 });
 
 /* メンバー退出時に実行 */
