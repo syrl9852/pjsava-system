@@ -217,9 +217,13 @@ client.on('guildMemberAdd', async member => {
 	//メンバー数の取得
 	const member_count = await memberCount()
 	//キャンバスづくり
-	const { createCanvas, loadImage } = require('canvas');
+	const { createCanvas, loadImage, registerFont } = require('canvas');
 	const canvas = createCanvas(700, 250);
 	const context = canvas.getContext('2d');
+	//フォントの読み込み
+	registerFont('./Fonts/NotoSerifJP-Black.otf', {family: 'Noto_Serif'});
+	registerFont('./Fonts/Roboto-Black.ttf', {family: 'Roboto'});
+	registerFont('./Fonts/-pr6n-r.otf', {family: 'Gothic'});
 	//背景画像の読み込み
 	const file_url = "./join.png"
 	const background = await loadImage(file_url);
