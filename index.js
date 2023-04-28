@@ -645,3 +645,26 @@ const rr = new ReactionRole( client, [
 
 //ログイン処理
 client.login(token);
+
+//終了処理
+const exit = (signal, value) => {
+	setTimeout(() => {
+		fs.writeFileSync('node.pid', '');
+		console.log(`process exit by ${signal}`);
+		process.exit(value);
+	}, 1000)
+};
+
+process.on("SIGHUP", () => {
+  exit("SIGHUP", 1);
+});
+
+process.on("SIGINT", () => {
+  exit("SIGINT", 2);
+});
+
+process.on("SIGTERM", () => {
+  exit("SIGTERM", 15);
+});
+//プロセスの管理用にpidを出力
+fs.writeFileSync('node.pid', `${process.pid}`);
