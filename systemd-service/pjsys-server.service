@@ -1,0 +1,13 @@
+[Unit]
+Description=Server daemon for PJsavaSystem.
+Requires=network-online.target
+After=network-online.target nss-lookup.target
+
+[Service]
+ExecStart={ProjectRoot}/run.sh
+ExecStop={ProjectRoot}/stop.sh
+Restart=no
+type=simple
+
+[Install]
+WantedBy=multi-user.target
