@@ -6,7 +6,7 @@ After=network-online.target nss-lookup.target
 [Service]
 ExecStart={ProjectRoot}/run.sh
 ExecStop={ProjectRoot}/stop.sh
-Restart=no
+Restart=on-failure
 type=simple
 
 [Install]
