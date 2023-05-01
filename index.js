@@ -663,13 +663,20 @@ const apiServer = net.createServer((connection) => {
 		 * レスポンスを返すときはconnection.write(String);で送信
 		 * 処理が終わったらconnection.end();で接続をクローズ
 		*/
-
+		connection.write('test');
 		connection.end();
 	});
 	connection.on('error', (err) => {
 		console.log(err.massage);
 	});
 });
+
+try {
+	fs.unlinkSync('/tmp/pjsys.unix.sock');
+} catch (error) {}
+//unixドメインソケットでリッスンする
+apiServer.listen('/tmp/pjsys.unix.sock');
+
 
 //終了処理
 const exit = (signal, value) => {
