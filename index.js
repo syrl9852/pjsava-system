@@ -18,6 +18,9 @@ const moment = require('moment-timezone');
 const cron = require('node-cron');
 const fs = require("fs");
 const { ReactionRole } = require("discordjs-reaction-role");
+const net = require("net")
+//ローカル用のapi向けに使用
+//client.login(token);の下に記述
 
 //設定ファイルの読み込み
 const config = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
@@ -645,6 +648,28 @@ const rr = new ReactionRole( client, [
 
 //ログイン処理
 client.login(token);
+
+//外部との連携用
+const apiServer = net.createServer((connection) => {
+	console.log('connected.');
+	connection.on('close', () => {
+		console.log('disconnected');
+	});
+	connection.on('data', (rawData) => { //ここからデータ受信時の処理
+		const data = JSON.parse(rawData.toString()); 
+		/*
+		 * jsonに変換されているデータをオブジェクト形式に復元してdataに代入
+		 * 送信側ではオブジェクト形式のデータをjsonに変換してから転送
+		 * レスポンスを返すときはconnection.write(String);で送信
+		 * 処理が終わったらconnection.end();で接続をクローズ
+		*/
+
+		connection.end();
+	});
+	connection.on('error', (err) => {
+		console.log(err.massage);
+	});
+});
 
 //終了処理
 const exit = (signal, value) => {
