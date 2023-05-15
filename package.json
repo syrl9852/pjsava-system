@@ -4,7 +4,9 @@
 	"description": "プロセカ民営公園用Bot「プロ鯖SYSTEM」です。",
 	"main": "index.js",
 	"scripts": {
-		"start": "npx node index.js"
+		"start": "npx node index.js",
+		"format:check": "npx prettier -c ./",
+		"format:fix": "npx prettier -w ./"
 	},
 	"author": "",
 	"license": "ISC",
@@ -17,11 +19,11 @@
 		"moment": "^2.29.4",
 		"moment-timezone": "^0.5.40",
 		"mysql": "^2.18.1",
-		"node-cron": "^3.0.2"
+		"node-cron": "^3.0.2",
+		"prettier": "^2.8.8"
 	},
 	"private": true,
 	"devDependencies": {
 		"node": "^16.19.0"
 	}
 }
-

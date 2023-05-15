@@ -1,0 +1,29 @@
+name: PR Prettier
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  perttire-job:
+    name: perttire job
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Prettier
+        run: npx prettier -c $(find|grep -e ".*\.js$"|grep -v "./node_modules")
