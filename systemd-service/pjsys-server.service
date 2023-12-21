@@ -4,10 +4,13 @@ Requires=network-online.target
 After=network-online.target nss-lookup.target
 
 [Service]
+User=runner
 ExecStart={ProjectRoot}/run.sh
 ExecStop={ProjectRoot}/stop.sh
 Restart=on-failure
-type=simple
+Type=simple
+User={user}
+
 
 [Install]
 WantedBy=multi-user.target
