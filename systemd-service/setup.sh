@@ -7,7 +7,8 @@ case $1 in
 			echo "インストールはrootで実行する必要があります"
 			exit 1
 		fi
-		cat pjsys-server.service |sed -e "s/{ProjectRoot}/$(dirname `pwd`|sed -e 's/\//\\\//g')/g" > /etc/systemd/system/pjsys-server.service
+		read -p "サーバーを実行するユーザー:" user
+		cat pjsys-server.service |sed -e "s/{user}/${user}/"|sed -e "s/{ProjectRoot}/$(dirname `pwd`|sed -e 's/\//\\\//g')/g" > /etc/systemd/system/pjsys-server.service
 		systemctl enable pjsys-server.service
 		systemctl start pjsys-server.service
 		if [[ $? == 0 ]];then
